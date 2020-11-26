@@ -11,3 +11,4 @@ To implement a train feed forward neural network with a softmax layer.  Theneura
 10.  Ankle Boot 
 The  training  network  will  be  coded  in  Python  and  will  make  use  of  theskeleton  code  provided.    In  order  to  fully  test  the  network,  the  remainingcode  will be  developed,  which  will include  a  back  propagation algorithm  anda mini-batch gradient descent.
 The project was created for the needs of Neural Computation module-MSc Robotics.
+It needs further optimization to produce better results.
