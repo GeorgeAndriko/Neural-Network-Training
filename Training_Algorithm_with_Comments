@@ -1,0 +1,86 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{graphicx}
+
+\title{Neural Computation\\Backpropagation and Softmax}
+\author{
+{\LARGE Group 28}\\\\
+\begin{tabular}{l l}
+
+George Andrikopoulos\\
+\end{tabular}
+}
+\date{\textit{November 2020}}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+% Document here
+\section{Aim}
+
+To implement a train feed forward neural network with a softmax layer. The neural network will be trained and tested using the Fashion MNIST dataset that provides 60,000 training examples and 10,000 test examples. The neural network therefore is required to correctly classify each one of the 10,000 (28x28) greyscale test images into one the 10 fashion items. The items of clothing are classified using 0-9 integers and are listed as: 
+
+\begin{enumerate}
+    \item T-shirt/top
+    \item Trouser
+    \item Pullover
+    \item Dress
+    \item Coat
+    \item Sandal
+    \item Shirt
+    \item Sneaker
+    \item Bag
+    \item Ankle Boot
+\end{enumerate}
+
+The training network will be coded in Python and will make use of the skeleton code provided. In order to fully test the network, the remaining code will be developed, which will include a back propagation algorithm and a mini-batch gradient descent. As per instructions no neural network library’s (\texttt{PyTorch} or \texttt{TensorFlow}) will be utilised and instead will only rely on \texttt{Numpy} and \texttt{Matplotlib}. 
+
+\section{Introduction}
+
+Robust learning models for classification tasks typically rely on a multi-layer feed-forward neural network that is trained through back propagation. The aforementioned network is made up of an input layer, hidden layers (in this case 3) and an output layer. As inputs are moved forward through the network, the next layer neurons are calculated through an activation function based on weights and a bias, creating a vector. Once the forward pass has reached the output layer (softmax layer) a cost function is used to see how the model is performing against the desired result. Next a backward pass (back propagation) adjusts the biases and weights given the first result, effectively trying to optimise the network. Therefore, the algorithm seeks to enhance the cost function by processing new examples (observations) from the dataset. The network is updated by calculating the gradients which makes small changes to the weights in each layer. The mini batch is used to take the average gradient of a small batch of observations.  
+
+
+\section{Methodology}
+ 
+Initially, there is the need of importing \texttt{NumPy} and \texttt{fnn\_utils} to the main algorithm. \texttt{Fnn\_utils} file provides the algorithm with plotting and data reading functions for the neural network coming from the provided data set. Then, a ReLu function is being chosen as the activation function. ReLu function is expressed as $y=max(0,x)$  and is linear for all the positive values (meaning that the slope does not saturate when $x$ increases) and zero for all the negative values (making it possible for given units to not activate at all providing model sparsity). As a result, the model can be trained and run faster. The next steps include the implementation of the softmax function in the softmax layer in order to produce a probability vector $(p_{1}, ... , p_{10})$ in the output layer by utilizing the vector $z=(z^{L}_{1}, ... , z^{L}_{10})$ corresponding to the 10 activation units in the softmax layer. The outputs of the softmax function are in the range of $[0,1]$ and add up to 1 forming a probability distribution. It needs to be called inside the backpropagation class of the algorithm for the data to be loaded. The code created to implement the softmax function is the following: 
+
+\begin{lstlisting}[language=Python]
+    def softmax(self, z):
+        z_exp = np.exp(z)
+        return z_exp / np.sum(z_exp)
+\end{lstlisting}
+
+Next, the forward function needs to be developed. The forward function utilizes an input image $x$ expressed as a vector of 784 elements. Initially, it applies the ReLu function over an entire array and then tries to center the input values in the range of $[-0.5,0.5]$. After, the forward function feeds forward through the layers and depending on the current weights and biases, returns the activations of the previous layers in the form of the probability vector $(p_{1}, ... , p_{10})$ which was previously mentioned.  \\
+
+
+In order to train the model, we need to calculate the difference between the output and target variable. Thus, we use a loss function following the principle of maximum likelihood. In order to achieve that, an initial vector $pred=(p_{1},...,p_{m})$ is used, being analogous to the 10 probability units in the output layer. Additionally, a vector $y \in \{0,1\}^{10}$ is utilized in order to provide indications on which of the 10 classes is correct by placing ‘1’ on the position corresponding to the correct class and ‘0’ to the rest of the vector. The function \texttt{np.argmax(y)}  returns the index at the maximum value in the array and is applied to help obtaining the class index from the encoded vector. The code conduct to achieve that, is outlined below: 
+
+\begin{lstlisting}[language=Python]
+    def loss(self, pred, y):
+        return - np.log(pred[np.argmax(y)])
+\end{lstlisting}
+
+For the completion of Task 4, we need to define a function able to update the partial derivatives of each layer. Having inspected the initialised partial derivatives in a given layer, we use the first image as the input for the forward function. Then we used the corresponding label of the corresponding training example as input for the backward function. This is being achieved by initially computing the local gradients for every layer of the network (\texttt{self.delta[]}) , then assessing their relationship with the weights (\texttt{self.dw[]}) and finally evaluates the biases for every layer of the network (\texttt{self.db[]}). \\
+
+
+The completion of task 5 is distributed and outlined throughout the code file provided alongside with the main report. Comments placed at certain parts of the code provide guidance for the content. However, this part is mainly concerned with evaluating the neural network on a random sub-set of size N. The random samples are generated with the use of \texttt{np.random.randint(num\_data, size=N)}. Then, in order to compute the mini-batch gradient descent of the training data, there is the need to define the function sgd which will be assigned a size equal to the training examples between each weight updated as the number of times going through the training data increases. This number of times is called epoch and in each completed epoch the network is exposed to the entire training set. Another aspect of this function is epsilon which is a hyperparameter ranging from 0.0 to 1.0 and it dictates how fast the neural network adapts to a certain situation. Epsilon is called the learning rate of the model. While the sgd function is executed, a ‘for’ loop runs through the mini-batch.
+
+\section{Testing}
+
+We carried out a number of tests on the code trying a variety of variables and activation functions. We have managed to get a neural network running, however it is not working as it should.  
+
+ 
+
+\section{Result}
+
+Having completed the skeleton code, completing tasks 1 to 5, we have so far been unable to build a fully functioning neural network. By tweaking the \texttt{sgd()} variables, we successfully got the following plots generated:
+
+\includegraphics[width=\columnwidth]{graph1}
+
+\includegraphics[width=\columnwidth]{graph2}
+
+However, it is clear that somewhere in our implementation, the neural network does not consider every class available, but instead settles with one class. Our first investigations point to maybe the \texttt{forward()} function being the culprit.
+\end{document}
